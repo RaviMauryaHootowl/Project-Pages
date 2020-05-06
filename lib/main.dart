@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -8,22 +7,11 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:hive/hive.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:project_pages/common/hex_color.dart';
 import 'file_model.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 const String boxName = 'fileBox';
-
-class HexColor extends Color {
-  static int _getColorFromHex(String hexColor) {
-    hexColor = hexColor.toUpperCase().replaceAll("#", "");
-    if (hexColor.length == 6) {
-      hexColor = "FF" + hexColor;
-    }
-    return int.parse(hexColor, radix: 16);
-  }
-
-  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
-}
 
 void main() async{ 
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +31,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int themeMode = 1;
+  int themeMode = 0;
   Box<FileModel> fileBox;
   final TextEditingController nameController = TextEditingController();
   TextEditingController _renameController = TextEditingController();
@@ -54,6 +42,12 @@ class _HomeState extends State<Home> {
   bool dialVisible = true;
   int countItems = -1;
   Icon dialIcon = Icon(Icons.add);
+
+
+  Color basicTextColor(){
+    return (themeMode == 0) ? Colors.black87 : Colors.white70;
+  }
+
 
   void setDialVisible(bool value) {
     setState(() {
@@ -452,6 +446,42 @@ class _HomeState extends State<Home> {
     return Future.value(false);
   }
 
+  Widget listElements(List<int> keys, Box<FileModel> files, int index){
+    final FileModel file = files.get(keys[index]);
+    return GestureDetector(
+      onLongPress: (){
+        _onLongPressedMenu(keys[index]);
+      },
+      child: ListTile(
+        title: Text(
+          file.fileName,
+          style: TextStyle(
+            fontSize: 18.0,
+            color: basicTextColor(),
+          ),
+        ),
+        leading: (file.type == 0) ? Image.asset('assets/pdficon.png', width: 24,) : Icon(Icons.folder, color: Colors.blue,),
+        onTap: (){
+          if(querySearch != ''){
+            _searchController.clear();
+            FocusScope.of(context).requestFocus(new FocusNode());
+            setState(() {
+              querySearch = '';
+            });
+          }
+          if(file.type == 0){
+            openFile(file.filePath);
+          }else{
+            //open this folder
+            setState(() {
+              curPlace = file.place + file.fileName + '/';
+            });
+          }
+        },
+      ),
+    );
+  }
+
   void filterList(String query){
     setState(() {
       querySearch = query;
@@ -468,16 +498,8 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     fileBox = Hive.box<FileModel>(boxName);
-    
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
   }
 
   @override
@@ -536,7 +558,7 @@ class _HomeState extends State<Home> {
                         filterList(text);
                       },
                       style: TextStyle(
-                        color: (themeMode == 0)? Colors.black45 : Colors.white70,
+                        color: basicTextColor(),
                       ),
                       cursorColor: Colors.black45,
                       decoration: InputDecoration(
@@ -573,7 +595,7 @@ class _HomeState extends State<Home> {
                             (querySearch == '') ? curPlace : '--',
                             style: TextStyle(
                               fontSize: 20.0,
-                              color: (themeMode == 0)? Colors.black45 : Colors.white70
+                              color: basicTextColor(),
                             ),
                           ),
                         ),
@@ -611,39 +633,7 @@ class _HomeState extends State<Home> {
                         print(keys);
                         return (keys.isNotEmpty) ? ListView.separated(
                           itemBuilder: (_, index){
-                            final FileModel file = files.get(keys[index]);
-                            return GestureDetector(
-                              onLongPress: (){
-                                _onLongPressedMenu(keys[index]);
-                              },
-                              child: ListTile(
-                                title: Text(
-                                  file.fileName,
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: (themeMode == 0) ? Colors.black87 : Colors.white70
-                                  ),
-                                ),
-                                leading: (file.type == 0) ? Image.asset('assets/pdficon.png', width: 24,) : Icon(Icons.folder, color: Colors.blue,),
-                                onTap: (){
-                                  if(querySearch != ''){
-                                    _searchController.clear();
-                                    FocusScope.of(context).requestFocus(new FocusNode());
-                                    setState(() {
-                                      querySearch = '';
-                                    });
-                                  }
-                                  if(file.type == 0){
-                                    openFile(file.filePath);
-                                  }else{
-                                    //open this folder
-                                    setState(() {
-                                      curPlace = file.place + file.fileName + '/';
-                                    });
-                                  }
-                                },
-                              ),
-                            );
+                            return listElements(keys, files, index);
                           },
                           separatorBuilder: (_, index) => Divider(), 
                           itemCount: keys.length,
@@ -652,32 +642,6 @@ class _HomeState extends State<Home> {
                       },
                     ),
                   ),
-
-                  //-------------- Delete Button --------------
-                  // Row(
-                  //   children: <Widget>[
-                  //     Padding(
-                  //       padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                  //       child: RawMaterialButton(
-                  //         onPressed: () {
-                  //           fileBox.clear();
-                  //           setState(() {
-                  //             curPlace = '/';
-                  //           });
-                  //         },
-                  //         elevation: 2.0,
-                  //         fillColor: Colors.red,
-                  //         child: Icon(
-                  //           Icons.delete,
-                  //           color: Colors.white,
-                  //           size: 25.0,
-                  //         ),
-                  //         padding: EdgeInsets.all(15.0),
-                  //         shape: CircleBorder(),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                 ],
               ),
             ),
@@ -688,5 +652,6 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
 
 
