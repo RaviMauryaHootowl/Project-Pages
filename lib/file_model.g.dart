@@ -13,9 +13,13 @@ class FileModelAdapter extends TypeAdapter<FileModel> {
   @override
   FileModel read(BinaryReader reader) {
     var numOfFields = reader.readByte();
-    var fields = <int, dynamic>{
-      for (var i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
-    };
+    // var fields = <int, dynamic>{
+    //   for (var i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    // };
+    var fields = <int, dynamic>{};
+    for(var i =0; i < numOfFields; i++){
+      fields.addAll({reader.readByte(): reader.read()});
+    }
     return FileModel(
       fileName: fields[1] as String,
       filePath: fields[2] as String,

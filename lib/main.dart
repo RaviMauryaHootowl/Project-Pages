@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -65,27 +66,32 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
   }
-
+  // FocusScopeNode currentFocus = FocusScope.of(context);
   @override
   Widget build(BuildContext context) {
+
     //debugPaintSizeEnabled = true;
-    print('Main Page builded again!');
     final FilesBloc filesBloc = Provider.of<FilesBloc>(context, listen: false);
+    print('Main Page builded again! -----');
     return WillPopScope(
       onWillPop: (){ return _onBackPressed(filesBloc);},
       child: GestureDetector(
         onTap: (){
-          FocusScopeNode currentFocus = FocusScope.of(context);
-
-          if (!currentFocus.hasPrimaryFocus) {
-            currentFocus.unfocus();
-          }
         },
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: (themeMode == 0) ? HexColor('EFEFEF') : HexColor('121212'),
           body: HomePage(),
           floatingActionButton: SpeedDialWidget(),
+          bottomNavigationBar: CustomNavBar(),
+
+          // bottomNavigationBar: BottomNavigationBar(items: [
+          //   BottomNavigationBarItem(title: Text('Recent') ,icon: Icon(Icons.access_time)),
+          //   BottomNavigationBarItem(title: Text('Home') ,icon: Icon(Icons.home),),
+          //   BottomNavigationBarItem(title: Text('Quick Notes') ,icon: Icon(Icons.note)),
+          // ],
+          // currentIndex: 1,
+          // ),
         ),
       ),
     );
@@ -93,6 +99,53 @@ class _HomeState extends State<Home> {
 }
 
 
+class CustomNavBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: HexColor('EFEFEF'),
+      padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(50.0),
+          boxShadow: [
+            BoxShadow(color: Colors.grey[300], blurRadius: 6.0, offset: Offset(0.5,0.5))
+          ]
+        ),
+        
+        padding: EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.access_time, size: 30, color: Colors.grey[600],),
+              Text('Recent', style: TextStyle(fontSize: 12),),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.home, size: 30, color: Colors.blue,),
+              Text('Home', style: TextStyle(fontSize: 12, color: Colors.blue),),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.note, size: 30, color: Colors.grey[600],),
+              Text('Notes', style: TextStyle(fontSize: 12),),
+            ],
+          ),
+          //Icon(Icons.home, size: 30, color: Colors.blue,),
+          //Icon(Icons.note, size: 30,color: Colors.grey[600],),
+        ],),
+      ),
+    );
+  }
+}
 
 
 
