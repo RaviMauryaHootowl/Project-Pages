@@ -8,25 +8,42 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:project_pages/common/hex_color.dart';
+import 'package:project_pages/note_model.dart';
 import 'package:project_pages/pages/home_page.dart';
+import 'package:project_pages/pages/notes_page.dart';
 import 'package:provider/provider.dart';
 import 'blocs/files_bloc.dart';
+import 'blocs/notes_bloc.dart';
 import 'file_model.dart';
+import 'package:project_pages/router.dart' as router;
 
 const String boxName = 'fileBox';
+const String boxNameNotes = 'noteBox';
 
 void main() async{ 
   WidgetsFlutterBinding.ensureInitialized();
   final document = await getApplicationDocumentsDirectory();
   Hive.init(document.path);
   Hive.registerAdapter(FileModelAdapter());
+  Hive.registerAdapter(NoteModelAdapter());
   await Hive.openBox<FileModel>(boxName);
-  runApp(ChangeNotifierProvider<FilesBloc>.value(
-      value: FilesBloc(),
-      child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Home()),
-  ),
+  await Hive.openBox<NoteModel>(boxNameNotes);
+  runApp(MultiProvider(
+        providers: [
+          ChangeNotifierProvider<FilesBloc>.value(
+            value: FilesBloc(),
+          ),
+          ChangeNotifierProvider<NotesBloc>.value(
+            value: NotesBloc(),
+          ),
+        ],
+        child: MaterialApp(
+        //debugShowCheckedModeBanner: false,
+          onGenerateRoute: router.generateRoute,
+          initialRoute: '/',
+          //home: Home()),
+        )
+    ),
   );
 }
 
@@ -37,6 +54,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int themeMode = 0;
+  int _currentIndex = 1; 
+  final List<Widget> _children = [
+    NotesPage(),
+    HomePage(),
+    NotesPage()
+  ]; 
 
   Color basicTextColor(){
     return (themeMode == 0) ? Colors.black87 : Colors.white70;
@@ -66,6 +89,13 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
   }
+
+  void setIndex(int i){
+    setState(() {
+      _currentIndex = i;
+    });
+  }
+
   // FocusScopeNode currentFocus = FocusScope.of(context);
   @override
   Widget build(BuildContext context) {
@@ -81,17 +111,8 @@ class _HomeState extends State<Home> {
         child: Scaffold(
           resizeToAvoidBottomInset: false,
           backgroundColor: (themeMode == 0) ? HexColor('EFEFEF') : HexColor('121212'),
-          body: HomePage(),
-          floatingActionButton: SpeedDialWidget(),
-          bottomNavigationBar: CustomNavBar(),
-
-          // bottomNavigationBar: BottomNavigationBar(items: [
-          //   BottomNavigationBarItem(title: Text('Recent') ,icon: Icon(Icons.access_time)),
-          //   BottomNavigationBarItem(title: Text('Home') ,icon: Icon(Icons.home),),
-          //   BottomNavigationBarItem(title: Text('Quick Notes') ,icon: Icon(Icons.note)),
-          // ],
-          // currentIndex: 1,
-          // ),
+          body: _children[_currentIndex],
+          bottomNavigationBar: CustomNavBar(setIndex, _currentIndex),
         ),
       ),
     );
@@ -100,6 +121,13 @@ class _HomeState extends State<Home> {
 
 
 class CustomNavBar extends StatelessWidget {
+  Function setIndexF;
+  int curIndex;
+  CustomNavBar(Function setIndex, int i){
+    setIndexF = setIndex;
+    curIndex = i;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -118,228 +146,60 @@ class CustomNavBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(Icons.access_time, size: 30, color: Colors.grey[600],),
-              Text('Recent', style: TextStyle(fontSize: 12),),
-            ],
+          Expanded(
+            child: InkWell(
+              onTap: (){
+                setIndexF(0);
+              },
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(Icons.access_time, size: 30, 
+                    color: (curIndex == 0) ? Colors.blue : Colors.grey[600],
+                  ),
+                  Text('Recent', style: TextStyle(fontSize: 12, 
+                    color: (curIndex == 0) ? Colors.blue : Colors.grey[600],
+                  ),),
+                ],
+              ),
+            ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(Icons.home, size: 30, color: Colors.blue,),
-              Text('Home', style: TextStyle(fontSize: 12, color: Colors.blue),),
-            ],
+          Expanded(
+                      child: InkWell(
+              onTap: (){setIndexF(1);},
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(Icons.home, size: 30, 
+                    color: (curIndex == 1) ? Colors.blue : Colors.grey[600],
+                  ),
+                  Text('Home', style: TextStyle(fontSize: 12, 
+                    color: (curIndex == 1) ? Colors.blue : Colors.grey[600],
+                  ),),
+                ],
+              ),
+            ),
           ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Icon(Icons.note, size: 30, color: Colors.grey[600],),
-              Text('Notes', style: TextStyle(fontSize: 12),),
-            ],
+          Expanded(
+                      child: InkWell(
+              onTap: (){setIndexF(2);},
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(Icons.note, size: 30, 
+                    color: (curIndex == 2) ? Colors.blue : Colors.grey[600],
+                  ),
+                  Text('Quick Notes', style: TextStyle(fontSize: 12, 
+                    color: (curIndex == 2) ? Colors.blue : Colors.grey[600],
+                  ),),
+                ],
+              ),
+            ),
           ),
           //Icon(Icons.home, size: 30, color: Colors.blue,),
           //Icon(Icons.note, size: 30,color: Colors.grey[600],),
         ],),
       ),
-    );
-  }
-}
-
-
-
-class SpeedDialWidget extends StatefulWidget {
-  @override
-  _SpeedDialWidgetState createState() => _SpeedDialWidgetState();
-}
-
-class _SpeedDialWidgetState extends State<SpeedDialWidget> {
-
-  Icon dialIcon = Icon(Icons.add);
-  void showDialogForAdd({int type}){
-    // nameController.clear();
-    showDialog(context: context,
-      builder: (context){
-        return DialogForAction(type);
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SpeedDial(
-      child: dialIcon,
-      //animatedIcon: AnimatedIcons.arrow_menu,
-      animatedIconTheme: IconThemeData(size: 22.0),
-      onOpen: () { setState(() {
-        dialIcon = Icon(Icons.close);
-      }); },
-      onClose: () { setState(() {
-        dialIcon = Icon(Icons.add);
-      });},
-      curve: Curves.bounceIn,
-      children: [
-        SpeedDialChild(
-          child: Icon(Icons.insert_drive_file, color: Colors.blue),
-          backgroundColor: Colors.white,
-          onTap: () {
-            showDialogForAdd(type: 0);
-          },
-          label: 'Add File',
-          labelStyle: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.white
-          ),
-          labelBackgroundColor: Colors.blue,
-        ),
-        SpeedDialChild(
-          child: Icon(Icons.folder, color: Colors.blue),
-          backgroundColor: Colors.white,
-          onTap: () {showDialogForAdd(type: 1);},
-          label: 'Add Folder',
-          labelStyle: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: Colors.white
-          ),
-          labelBackgroundColor: Colors.blue,
-        ),
-      ],
-    );
-  }
-}
-
-
-class DialogForAction extends StatefulWidget {
-
-  int type;
-  DialogForAction(int type){
-    this.type = type;
-  }
-
-  @override
-  _DialogForActionState createState() => _DialogForActionState();
-}
-
-class _DialogForActionState extends State<DialogForAction> {
-
-  String selectedFilePath = 'null';
-  String selectedStatus = '';
-  bool _validateField = false;
-  final TextEditingController nameController = TextEditingController();
-
-  Future<String> getFilePath() async {
-   try {
-      String filePath = await FilePicker.getFilePath(type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'xlsx']
-      );
-      if (filePath == '') {
-        return 'null';
-      }
-      print("File path: " + filePath);
-      return filePath;
-    } on Exception catch (e) {
-      return 'null';
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final FilesBloc filesBloc = Provider.of<FilesBloc>(context, listen: false);
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15.0),
-          color: Colors.white
-        ),
-        padding: EdgeInsets.all(15.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              (widget.type == 0) ? 'Add New File' : 'Add New Folder',
-              style: TextStyle(
-                fontSize: 22.0,
-                fontWeight: FontWeight.w600
-              ),
-            ),
-            SizedBox(height: 20.0),
-            
-            (widget.type == 0) ? Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                RaisedButton(onPressed: () async {
-                  setState(() {
-                    selectedStatus = 'Loading...';
-                  });
-                    String file = await getFilePath();
-                    setState(() {
-                      selectedFilePath = file;
-                      if(file != 'null'){
-                        selectedStatus = 'Selected';
-                      }
-                    });
-                  },
-                  child: Text('Select File', style: TextStyle(color: Colors.white),),
-                  color: Colors.blueAccent,
-                ),
-                SizedBox(width: 10.0),
-                Text(
-                  '$selectedStatus',
-                ),
-              ],
-            ) : Container(),
-            SizedBox(height: 20.0),
-            TextField(
-              decoration: InputDecoration(
-                hintText: (widget.type == 0) ? 'Enter a file Name' : 'Enter the Folder Name',
-                errorText: (_validateField) ? 'Can\'t be empty' : null,
-              ),
-              controller: nameController,
-              onChanged: (text){
-                if(text.isNotEmpty){
-                  setState(() {
-                    _validateField = false;
-                  });
-                }
-              },
-            ),
-            SizedBox(height: 40.0),
-            RaisedButton(
-              child: Text('Add', style: TextStyle(color: Colors.white),),
-              color: Colors.blue,
-              onPressed: () async {
-                //Add to hive box
-                if(nameController.text.isEmpty){
-                  setState(() {
-                    _validateField = true;
-                  });
-                }else{
-                  setState(() {
-                    _validateField = false;
-                  });
-                  if(widget.type == 1 || (widget.type == 0 && selectedFilePath!='null'))
-                  {
-                    final String name = nameController.text;
-                    final String path = selectedFilePath;
-                    print(path);
-                    FileModel file = FileModel(fileName: name, filePath: path, type: widget.type, place: filesBloc.getPath);
-                    filesBloc.addToBox(file);
-                    //fileBox.add(file);
-                    Navigator.pop(context);
-                  }else{
-                    setState(() {
-                      selectedStatus = 'No file selected';
-                    });
-                  }
-                }
-              },
-            )
-          ],
-        ),
-      )
     );
   }
 }

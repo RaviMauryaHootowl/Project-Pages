@@ -1,8 +1,11 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:open_file/open_file.dart';
 import 'package:project_pages/blocs/files_bloc.dart';
 import 'package:project_pages/common/hex_color.dart';
 import 'package:provider/provider.dart';
+import 'package:flare_flutter/flare_actor.dart';
 
 import '../file_model.dart';
 int themeMode = 0;
@@ -35,7 +38,15 @@ class _HomePageState extends State<HomePage> {
               height: 3.0,
             ),
             Expanded(
-              child: FilesListWidget(),
+              child: Stack(
+                children: <Widget>[
+                  FilesListWidget(),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: SpeedDialWidget()
+                  ),
+                ],
+              ),
             ),
             //Container(height: 8, color: Colors.blue,)
           ],
@@ -208,10 +219,13 @@ class FilesListWidget extends StatelessWidget {
       separatorBuilder: (_, index) => Divider(), 
       itemCount: files.length,
       shrinkWrap: true,
-    ) : Center(child: Container(
-      child: Image.asset('assets/filenotfound5.png', width: 200),
-    ));
-
+    ) : Container(
+        child: FlareActor(
+            'assets/anim.flr',
+            animation: 'Idle',
+            fit: BoxFit.contain,
+          ),
+      );
   }
 }
 
@@ -425,6 +439,208 @@ class RenameDialog extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+
+
+
+class SpeedDialWidget extends StatefulWidget {
+  @override
+  _SpeedDialWidgetState createState() => _SpeedDialWidgetState();
+}
+
+class _SpeedDialWidgetState extends State<SpeedDialWidget> {
+
+  Icon dialIcon = Icon(Icons.add);
+  void showDialogForAdd({int type}){
+    // nameController.clear();
+    showDialog(context: context,
+      builder: (context){
+        return DialogForAction(type);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(right:16),
+      child: SpeedDial(
+        
+        child: dialIcon,
+        //animatedIcon: AnimatedIcons.arrow_menu,
+        animatedIconTheme: IconThemeData(size: 22.0),
+        onOpen: () { setState(() {
+          dialIcon = Icon(Icons.close);
+        }); },
+        onClose: () { setState(() {
+          dialIcon = Icon(Icons.add);
+        });},
+        curve: Curves.bounceIn,
+        children: [
+          SpeedDialChild(
+            child: Icon(Icons.insert_drive_file, color: Colors.blue),
+            backgroundColor: Colors.white,
+            onTap: () {
+              showDialogForAdd(type: 0);
+            },
+            label: 'Add File',
+            labelStyle: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.white
+            ),
+            labelBackgroundColor: Colors.blue,
+          ),
+          SpeedDialChild(
+            child: Icon(Icons.folder, color: Colors.blue),
+            backgroundColor: Colors.white,
+            onTap: () {showDialogForAdd(type: 1);},
+            label: 'Add Folder',
+            labelStyle: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.white
+            ),
+            labelBackgroundColor: Colors.blue,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class DialogForAction extends StatefulWidget {
+
+  int type;
+  DialogForAction(int type){
+    this.type = type;
+  }
+
+  @override
+  _DialogForActionState createState() => _DialogForActionState();
+}
+
+class _DialogForActionState extends State<DialogForAction> {
+
+  String selectedFilePath = 'null';
+  String selectedStatus = '';
+  bool _validateField = false;
+  final TextEditingController nameController = TextEditingController();
+
+  Future<String> getFilePath() async {
+   try {
+      String filePath = await FilePicker.getFilePath(type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx', 'xlsx']
+      );
+      if (filePath == '') {
+        return 'null';
+      }
+      print("File path: " + filePath);
+      return filePath;
+    } on Exception catch (e) {
+      return 'null';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final FilesBloc filesBloc = Provider.of<FilesBloc>(context, listen: false);
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15.0),
+          color: Colors.white
+        ),
+        padding: EdgeInsets.all(15.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              (widget.type == 0) ? 'Add New File' : 'Add New Folder',
+              style: TextStyle(
+                fontSize: 22.0,
+                fontWeight: FontWeight.w600
+              ),
+            ),
+            SizedBox(height: 20.0),
+            
+            (widget.type == 0) ? Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                RaisedButton(onPressed: () async {
+                  setState(() {
+                    selectedStatus = 'Loading...';
+                  });
+                    String file = await getFilePath();
+                    setState(() {
+                      selectedFilePath = file;
+                      if(file != 'null'){
+                        selectedStatus = 'Selected';
+                      }
+                    });
+                  },
+                  child: Text('Select File', style: TextStyle(color: Colors.white),),
+                  color: Colors.blueAccent,
+                ),
+                SizedBox(width: 10.0),
+                Text(
+                  '$selectedStatus',
+                ),
+              ],
+            ) : Container(),
+            SizedBox(height: 20.0),
+            TextField(
+              decoration: InputDecoration(
+                hintText: (widget.type == 0) ? 'Enter a file Name' : 'Enter the Folder Name',
+                errorText: (_validateField) ? 'Can\'t be empty' : null,
+              ),
+              controller: nameController,
+              onChanged: (text){
+                if(text.isNotEmpty){
+                  setState(() {
+                    _validateField = false;
+                  });
+                }
+              },
+            ),
+            SizedBox(height: 40.0),
+            RaisedButton(
+              child: Text('Add', style: TextStyle(color: Colors.white),),
+              color: Colors.blue,
+              onPressed: () async {
+                //Add to hive box
+                if(nameController.text.isEmpty){
+                  setState(() {
+                    _validateField = true;
+                  });
+                }else{
+                  setState(() {
+                    _validateField = false;
+                  });
+                  if(widget.type == 1 || (widget.type == 0 && selectedFilePath!='null'))
+                  {
+                    final String name = nameController.text;
+                    final String path = selectedFilePath;
+                    print(path);
+                    FileModel file = FileModel(fileName: name, filePath: path, type: widget.type, place: filesBloc.getPath);
+                    filesBloc.addToBox(file);
+                    //fileBox.add(file);
+                    Navigator.pop(context);
+                  }else{
+                    setState(() {
+                      selectedStatus = 'No file selected';
+                    });
+                  }
+                }
+              },
+            )
+          ],
+        ),
+      )
     );
   }
 }
