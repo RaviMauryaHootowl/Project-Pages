@@ -22,7 +22,7 @@ class NotesBloc extends ChangeNotifier{
   }
 
   NoteModel queryBoxNote(int keyToQuery){
-    return noteBox.getAt(keyToQuery);
+    return noteBox.get(keyToQuery);
   }
 
   void addToBox(NoteModel fm, indexToSaveAt){
@@ -31,6 +31,11 @@ class NotesBloc extends ChangeNotifier{
     }else{
       noteBox.put(indexToSaveAt, fm);
     }
+    notifyListeners();
+  }
+
+  void deleteFromBox(int keyToDelete){
+    noteBox.delete(keyToDelete);
     notifyListeners();
   }
 

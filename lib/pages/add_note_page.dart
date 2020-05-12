@@ -17,6 +17,28 @@ class _AddNotePageState extends State<AddNotePage> {
   List<String> colors = ['A1FF92', 'FFD392', 'D2A5FF', '92CAFF', 'DFDFDF'];
   Map args = {};
   int loadedIndex = -1;
+
+  Widget colorButton(int curColorButtonIndex){
+    return InkWell(
+      onTap: (){
+        setState(() {
+          colorIndex = curColorButtonIndex; 
+        });
+      },
+      child: Card(
+        elevation: 10.0,
+        shape: CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: CircleAvatar(
+          child: (colorIndex == curColorButtonIndex) ? Icon(Icons.done) : null,
+          backgroundColor: HexColor(colors[curColorButtonIndex]),
+          radius: 20,
+        ),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final NotesBloc notesBloc = Provider.of<NotesBloc>(context, listen: false);
@@ -41,12 +63,18 @@ class _AddNotePageState extends State<AddNotePage> {
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Container(
+            decoration: BoxDecoration(
+              color: HexColor(colors[colorIndex]),
+              borderRadius: BorderRadius.circular(10.0)
+            ),
             padding: EdgeInsets.all(10.0),
-            color: HexColor(colors[colorIndex]),
             child: Column(
               children: [
                 Expanded(
                   child: TextField(
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
                     controller: _noteController,
                     decoration: InputDecoration(
                       hintText: "Type your note here",
@@ -61,86 +89,11 @@ class _AddNotePageState extends State<AddNotePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          colorIndex = 0; 
-                        });
-                      },
-                      child: Card(
-                        elevation: 10.0,
-                        shape: CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: CircleAvatar(
-                          backgroundColor: HexColor(colors[0]),
-                          radius: 20,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          colorIndex = 1; 
-                        });
-                      },
-                      child: Card(
-                        elevation: 10.0,
-                        shape: CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: CircleAvatar(
-                          backgroundColor: HexColor(colors[1]),
-                          radius: 20,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          colorIndex = 2; 
-                        });
-                      },
-                      child: Card(
-                        elevation: 10.0,
-                        shape: CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: CircleAvatar(
-                          backgroundColor: HexColor(colors[2]),
-                          radius: 20,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          colorIndex = 3; 
-                        });
-                      },
-                      child: Card(
-                        elevation: 10.0,
-                        shape: CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: CircleAvatar(
-                          backgroundColor: HexColor(colors[3]),
-                          radius: 20,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: (){
-                        setState(() {
-                          colorIndex = 4; 
-                        });
-                      },
-                      child: Card(
-                        elevation: 10.0,
-                        shape: CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: CircleAvatar(
-                          backgroundColor: HexColor(colors[4]),
-                          radius: 20,
-                        ),
-                      ),
-                    ),
+                    colorButton(0),
+                    colorButton(1),
+                    colorButton(2),
+                    colorButton(3),
+                    colorButton(4),
                     FlatButton(onPressed: (){
                       NoteModel tempNote = NoteModel(noteText : _noteController.text, noteColor: colors[colorIndex], noteTime: '');
                       notesBloc.addToBox(tempNote, loadedIndex);

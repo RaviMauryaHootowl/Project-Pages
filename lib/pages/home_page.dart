@@ -219,13 +219,16 @@ class FilesListWidget extends StatelessWidget {
       separatorBuilder: (_, index) => Divider(), 
       itemCount: files.length,
       shrinkWrap: true,
-    ) : Container(
-        child: FlareActor(
-            'assets/anim.flr',
-            animation: 'Idle',
-            fit: BoxFit.contain,
-          ),
-      );
+    ) : Center(
+      child: Container(
+        child: Image.asset('assets/1.png', width: 200,),
+          // child: FlareActor(
+          //     'assets/anim.flr',
+          //     animation: 'Idle',
+          //     fit: BoxFit.contain,
+          //   ),
+        ),
+    );
   }
 }
 
