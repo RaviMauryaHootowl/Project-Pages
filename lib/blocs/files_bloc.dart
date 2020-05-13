@@ -96,10 +96,22 @@ class FilesBloc extends ChangeNotifier{
     notifyListeners();
   }
 
-  void renameFromBox(FileModel fileToDelete, String newName){
+  void renameFromBox(FileModel fileToRename, String newName){
     List<FileModel> allfiles = fileBox.values.toList();
     List<int> allkeys = fileBox.keys.cast<int>().toList();
-    int keyToRename = allkeys[allfiles.indexWhere((fileX) => fileX == fileToDelete)];
+    int keyToRename = allkeys[allfiles.indexWhere((fileX) => fileX == fileToRename)];
+    String pathOfTheFileToBeRenamed = fileToRename.place;
+    for(int i = 0; i < allkeys.length; i++){
+      if(fileBox.get(allkeys[i]).place.startsWith(pathOfTheFileToBeRenamed) && fileBox.get(allkeys[i]).place != pathOfTheFileToBeRenamed){
+
+        int lenOfPrePath = pathOfTheFileToBeRenamed.length;
+        int posOfEnding = fileToRename.fileName.length + lenOfPrePath;
+        String newPlacePath = pathOfTheFileToBeRenamed + newName + fileBox.get(allkeys[i]).place.substring(posOfEnding);
+        FileModel _tempModel = fileBox.get(allkeys[i]);
+        _tempModel.place = newPlacePath;
+        fileBox.put(allkeys[i], _tempModel);
+      }
+    }
     FileModel _tempModel = fileBox.get(keyToRename);
     _tempModel.fileName = newName;
     fileBox.put(keyToRename, _tempModel);

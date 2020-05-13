@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:open_file/open_file.dart';
@@ -517,9 +516,7 @@ class _SpeedDialWidgetState extends State<SpeedDialWidget> {
 class DialogForAction extends StatefulWidget {
 
   int type;
-  DialogForAction(int type){
-    this.type = type;
-  }
+  DialogForAction(this.type);
 
   @override
   _DialogForActionState createState() => _DialogForActionState();
@@ -532,25 +529,9 @@ class _DialogForActionState extends State<DialogForAction> {
   bool _validateField = false;
   final TextEditingController nameController = TextEditingController();
 
-  Future<String> getFilePath() async {
-   try {
-      String filePath = await FilePicker.getFilePath(type: FileType.custom,
-        allowedExtensions: ['pdf', 'doc', 'docx', 'xlsx']
-      );
-      if (filePath == '') {
-        return 'null';
-      }
-      print("File path: " + filePath);
-      return filePath;
-    } on Exception catch (e) {
-      return 'null';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final FilesBloc filesBloc = Provider.of<FilesBloc>(context, listen: false);
-
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
@@ -574,21 +555,20 @@ class _DialogForActionState extends State<DialogForAction> {
             (widget.type == 0) ? Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
-                RaisedButton(onPressed: () async {
-                  setState(() {
-                    selectedStatus = 'Loading...';
-                  });
-                    String file = await getFilePath();
+                RaisedButton(
+                  onPressed: () async{
+                    // Navigate to file selection page ang get file
+                    var fileSelectedPath = await Navigator.pushNamed(context, 'selectFile');
+                    print('File Recieved : $fileSelectedPath');
                     setState(() {
-                      selectedFilePath = file;
-                      if(file != 'null'){
-                        selectedStatus = 'Selected';
-                      }
+                      selectedStatus = 'File Selected';
+                      selectedFilePath = fileSelectedPath;
                     });
                   },
                   child: Text('Select File', style: TextStyle(color: Colors.white),),
-                  color: Colors.blueAccent,
+                  color: Colors.blueAccent
                 ),
+                
                 SizedBox(width: 10.0),
                 Text(
                   '$selectedStatus',
