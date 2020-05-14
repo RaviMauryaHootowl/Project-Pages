@@ -11,6 +11,14 @@ class AddNotePage extends StatefulWidget {
   AddNotePage({this.argument});
 }
 
+final Map<String, String> ligthToDark = {
+  'A1FF92' : '6fc961', 
+  'FFD392' : 'dbac67', 
+  'D2A5FF' : '9e6bd1', 
+  '92CAFF' : '609ad1', 
+  'DFDFDF' : 'a1a1a1'
+};
+
 class _AddNotePageState extends State<AddNotePage> {
   final TextEditingController _noteController = TextEditingController();
   int colorIndex = 0;
@@ -63,48 +71,55 @@ class _AddNotePageState extends State<AddNotePage> {
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Container(
+            padding: EdgeInsets.only(bottom: 5.0),
             decoration: BoxDecoration(
-              color: HexColor(colors[colorIndex]),
-              borderRadius: BorderRadius.circular(10.0)
+                color: HexColor(ligthToDark[colors[colorIndex]]),
+                borderRadius: BorderRadius.circular(10.0)
             ),
-            padding: EdgeInsets.all(10.0),
-            child: Column(
-              children: [
-                Expanded(
-                  child: TextField(
-                    style: TextStyle(
-                      fontSize: 18,
+            child: Container(
+              decoration: BoxDecoration(
+                color: HexColor(colors[colorIndex]),
+                borderRadius: BorderRadius.circular(10.0)
+              ),
+              padding: EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                      controller: _noteController,
+                      decoration: InputDecoration(
+                        hintText: "Type your note here",
+                        border: InputBorder.none,
+                      ),
+                      scrollPadding: EdgeInsets.all(20.0),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 99999,
+                      autofocus: true,
                     ),
-                    controller: _noteController,
-                    decoration: InputDecoration(
-                      hintText: "Type your note here",
-                      border: InputBorder.none,
-                    ),
-                    scrollPadding: EdgeInsets.all(20.0),
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 99999,
-                    autofocus: true,
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    colorButton(0),
-                    colorButton(1),
-                    colorButton(2),
-                    colorButton(3),
-                    colorButton(4),
-                    FlatButton(onPressed: (){
-                      NoteModel tempNote = NoteModel(noteText : _noteController.text, noteColor: colors[colorIndex], noteTime: '');
-                      notesBloc.addToBox(tempNote, loadedIndex);
-                      Navigator.pop(context);
-                      }, 
-                      child: Text('Save')
-                    )
-                  ]
-                )
-                
-              ]
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      colorButton(0),
+                      colorButton(1),
+                      colorButton(2),
+                      colorButton(3),
+                      colorButton(4),
+                      FlatButton(onPressed: (){
+                        NoteModel tempNote = NoteModel(noteText : _noteController.text, noteColor: colors[colorIndex], noteTime: '');
+                        notesBloc.addToBox(tempNote, loadedIndex);
+                        Navigator.pop(context);
+                        }, 
+                        child: Text('Save')
+                      )
+                    ]
+                  )
+                  
+                ]
+              ),
             ),
           ),
         ),

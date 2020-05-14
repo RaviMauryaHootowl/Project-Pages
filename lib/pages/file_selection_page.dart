@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:project_pages/common/hex_color.dart';
+import 'package:project_pages/pages/home_page.dart';
 import 'package:storage_path/storage_path.dart';
 
 class FileSelectionPage extends StatefulWidget {
@@ -61,7 +63,7 @@ class _FileSelectionPageState extends State<FileSelectionPage> {
   //   }
   //   return audioPath;
   // }
-
+  //String res = 'Loading';
   String searchQ = '';
   List<String> allfiles = [];
   List<String> allfilesPath = [];
@@ -72,11 +74,9 @@ class _FileSelectionPageState extends State<FileSelectionPage> {
     try {
       filePath = await StoragePath.filePath;
       response = jsonDecode(filePath);
-      //print('--------------------------');
-      //print(response[0]['files'][0]['path']);
-      //print('--------------------------');
-      //Clipboard.setData(ClipboardData(text: filePath.toString()));
-    } on PlatformException {
+      //Scaffold.of(context).showSnackBar(SnackBar(content: Text('File Fetched')));
+    } on Exception {
+      //Scaffold.of(context).showSnackBar(SnackBar(content: Text('Error')));
       filePath = 'Failed to get path';
     }
 
@@ -149,18 +149,39 @@ class _FileSelectionPageState extends State<FileSelectionPage> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                          hintText: 'Search within ${allfiles.length} files'),
-                      onChanged: (text) {
-                        allfiles.clear();
-                        allfilesPath.clear();
-                        allfilesFolderName.clear();
-                        setState(() {
-                          searchQ = text;
-                        });
-                      },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (text) {
+                          allfiles.clear();
+                          allfilesPath.clear();
+                          allfilesFolderName.clear();
+                          setState(() {
+                            searchQ = text;
+                          });
+                        },
+                        style: TextStyle(
+                          color: basicTextColor(),
+                        ),
+                        cursorColor: Colors.black45,
+                        decoration: InputDecoration(
+                          hintText: 'Search within ${allfiles.length} files',
+                          filled: true,
+                          hintStyle: TextStyle(
+                            color: (themeMode == 0) ? Colors.black45 : Colors.white38,
+                          ),
+                          fillColor: (themeMode == 0) ? HexColor('d7dde0') : HexColor('#373737'),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                            borderSide: BorderSide(color: Colors.transparent),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],

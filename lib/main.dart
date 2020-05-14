@@ -87,6 +87,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    //var status = Permission.camera.status;
   }
 
   void setIndex(int i){

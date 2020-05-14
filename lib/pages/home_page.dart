@@ -537,7 +537,7 @@ class _DialogForActionState extends State<DialogForAction> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15.0),
-          color: Colors.white
+          color: HexColor('EFEFEF')
         ),
         padding: EdgeInsets.all(15.0),
         child: Column(
@@ -556,17 +556,23 @@ class _DialogForActionState extends State<DialogForAction> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 RaisedButton(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.0)
+                  ),
+                  padding: EdgeInsets.fromLTRB(20,15,20,15),
                   onPressed: () async{
                     // Navigate to file selection page ang get file
                     var fileSelectedPath = await Navigator.pushNamed(context, 'selectFile');
                     print('File Recieved : $fileSelectedPath');
-                    setState(() {
-                      selectedStatus = 'File Selected';
-                      selectedFilePath = fileSelectedPath;
-                    });
+                    if(fileSelectedPath != null){
+                      setState(() {
+                        selectedStatus = 'File Selected';
+                        selectedFilePath = fileSelectedPath;
+                      });
+                    }
                   },
                   child: Text('Select File', style: TextStyle(color: Colors.white),),
-                  color: Colors.blueAccent
+                  color: Colors.blue
                 ),
                 
                 SizedBox(width: 10.0),
@@ -578,7 +584,17 @@ class _DialogForActionState extends State<DialogForAction> {
             SizedBox(height: 20.0),
             TextField(
               decoration: InputDecoration(
-                hintText: (widget.type == 0) ? 'Enter a file Name' : 'Enter the Folder Name',
+                fillColor: HexColor('d7dde0'),
+                filled: true,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(color: Colors.transparent),
+                ),
+                hintText: (widget.type == 0) ? 'Enter a File Name' : 'Enter the Folder Name',
                 errorText: (_validateField) ? 'Can\'t be empty' : null,
               ),
               controller: nameController,
@@ -594,6 +610,10 @@ class _DialogForActionState extends State<DialogForAction> {
             RaisedButton(
               child: Text('Add', style: TextStyle(color: Colors.white),),
               color: Colors.blue,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(50.0)
+              ),
+              padding: EdgeInsets.fromLTRB(40,15,40,15),
               onPressed: () async {
                 //Add to hive box
                 if(nameController.text.isEmpty){

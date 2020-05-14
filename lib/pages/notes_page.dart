@@ -56,7 +56,7 @@ class _NotesPageState extends State<NotesPage> {
 class AddButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final NotesBloc notesBloc = Provider.of<NotesBloc>(context, listen: false);
+    //final NotesBloc notesBloc = Provider.of<NotesBloc>(context, listen: false);
     return MaterialButton(
       onPressed: () {
         //notesBloc.deleteEverything();
@@ -179,7 +179,7 @@ class _NotesListWidgetState extends State<NotesListWidget> {
               borderRadius: BorderRadius.circular(10.0),
               color: HexColor(ligthToDark[notes[index].noteColor]),
             ),
-            padding: EdgeInsets.fromLTRB(0, 0, 0, 5.0),
+            padding: EdgeInsets.only(bottom: 5.0),
             margin: EdgeInsets.only(bottom: 10.0),
             child: Container(
               padding: EdgeInsets.all(10.0),
