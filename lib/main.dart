@@ -53,9 +53,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int themeMode = 0;
-  int _currentIndex = 1; 
+  int _currentIndex = 0; 
   final List<Widget> _children = [
-    NotesPage(),
     HomePage(),
     NotesPage()
   ]; 
@@ -148,49 +147,31 @@ class CustomNavBar extends StatelessWidget {
           children: <Widget>[
           Expanded(
             child: InkWell(
-              onTap: (){
-                setIndexF(0);
-              },
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(Icons.access_time, size: 30, 
-                    color: (curIndex == 0) ? Colors.blue : Colors.grey[600],
-                  ),
-                  Text('Recent', style: TextStyle(fontSize: 12, 
-                    color: (curIndex == 0) ? Colors.blue : Colors.grey[600],
-                  ),),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-                      child: InkWell(
-              onTap: (){setIndexF(1);},
+              onTap: (){setIndexF(0);},
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Icon(Icons.home, size: 30, 
-                    color: (curIndex == 1) ? Colors.blue : Colors.grey[600],
+                    color: (curIndex == 0) ? Colors.blue : Colors.grey[600],
                   ),
                   Text('Home', style: TextStyle(fontSize: 12, 
-                    color: (curIndex == 1) ? Colors.blue : Colors.grey[600],
+                    color: (curIndex == 0) ? Colors.blue : Colors.grey[600],
                   ),),
                 ],
               ),
             ),
           ),
           Expanded(
-                      child: InkWell(
-              onTap: (){setIndexF(2);},
+            child: InkWell(
+              onTap: (){setIndexF(1);},
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Icon(Icons.note, size: 30, 
-                    color: (curIndex == 2) ? Colors.blue : Colors.grey[600],
+                    color: (curIndex == 1) ? Colors.blue : Colors.grey[600],
                   ),
                   Text('Quick Notes', style: TextStyle(fontSize: 12, 
-                    color: (curIndex == 2) ? Colors.blue : Colors.grey[600],
+                    color: (curIndex == 1) ? Colors.blue : Colors.grey[600],
                   ),),
                 ],
               ),
