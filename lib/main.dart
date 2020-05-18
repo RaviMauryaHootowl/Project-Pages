@@ -19,7 +19,7 @@ import 'package:project_pages/router.dart' as router;
 const String boxName = 'fileBox';
 const String boxNameNotes = 'noteBox';
 
-void main() async{ 
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   final document = await getApplicationDocumentsDirectory();
   Hive.init(document.path);
@@ -87,6 +87,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     //var status = Permission.camera.status;
+    askPermission();
   }
 
   void setIndex(int i){
@@ -94,14 +95,24 @@ class _HomeState extends State<Home> {
       _currentIndex = i;
     });
   }
+  static const platform = const MethodChannel("com.raviowl.project_pages/pages");
+
+  void askPermission()async{
+    try{
+      String s = await platform.invokeMethod("getPermission");
+    }catch(e){
+      print(e);
+    }
+  }
 
   // FocusScopeNode currentFocus = FocusScope.of(context);
   @override
   Widget build(BuildContext context) {
-
+    
     //debugPaintSizeEnabled = true;
     final FilesBloc filesBloc = Provider.of<FilesBloc>(context, listen: false);
     print('Main Page builded again! -----');
+    
     return WillPopScope(
       onWillPop: (){ return _onBackPressed(filesBloc);},
       child: GestureDetector(

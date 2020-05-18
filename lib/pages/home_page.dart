@@ -5,6 +5,7 @@ import 'package:project_pages/blocs/files_bloc.dart';
 import 'package:project_pages/common/hex_color.dart';
 import 'package:provider/provider.dart';
 import 'package:flare_flutter/flare_actor.dart';
+import 'package:flutter/services.dart';
 
 import '../file_model.dart';
 int themeMode = 0;
@@ -528,10 +529,22 @@ class _DialogForActionState extends State<DialogForAction> {
   String selectedStatus = '';
   bool _validateField = false;
   final TextEditingController nameController = TextEditingController();
+  List<dynamic> files = [];
+
+  static const platform = const MethodChannel("com.raviowl.project_pages/pages");
+  void getFilePath() async {
+    try{
+      files = await platform.invokeMethod("getFiles");
+    }catch(e){
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final FilesBloc filesBloc = Provider.of<FilesBloc>(context, listen: false);
+    //getFilePath(); // From the Native Code
+
     return Dialog(
       backgroundColor: Colors.transparent,
       child: Container(
@@ -551,7 +564,6 @@ class _DialogForActionState extends State<DialogForAction> {
               ),
             ),
             SizedBox(height: 20.0),
-            
             (widget.type == 0) ? Row(
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
@@ -561,6 +573,9 @@ class _DialogForActionState extends State<DialogForAction> {
                   ),
                   padding: EdgeInsets.fromLTRB(20,15,20,15),
                   onPressed: () async{
+                    setState(() {
+                      selectedStatus = 'Loading...';
+                    });
                     // Navigate to file selection page ang get file
                     var fileSelectedPath = await Navigator.pushNamed(context, 'selectFile');
                     print('File Recieved : $fileSelectedPath');
@@ -568,6 +583,10 @@ class _DialogForActionState extends State<DialogForAction> {
                       setState(() {
                         selectedStatus = 'File Selected';
                         selectedFilePath = fileSelectedPath;
+                      });
+                    }else{
+                      setState(() {
+                        selectedStatus = '';
                       });
                     }
                   },
